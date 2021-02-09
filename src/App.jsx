@@ -124,11 +124,23 @@ function App() {
   }, [modelPath]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div style={{ width: 800, height: 600, border: '5px solid black', borderRadius: 5, marginBottom: '2rem' }} ref={ref} />
-      <div style={{ width: 800, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around' }}>
-        <button onClick={() => setModelPath('./toyota_prius/scene.gltf')}>Show Toyota Prius</button>
-        <button onClick={() => setModelPath('./hyundai_accent/scene.gltf')}>Show Hyundai Accent</button>
+    <div className="flex flex-col items-center">
+      <h1 className="text-3xl my-10 font-bold">Three JS  + React </h1>
+      <div className="w-3/5 border-2 border-black rounded-md mb-10" style={{ height: 600 }} ref={ref} />
+      <div className="w-3/5 flex flex-wrap justify-around">
+        <p className="w-full text-center font-bold text-xl">Choose a car to show ... </p>
+        <button
+          className="border-2 rounded-md bg-green-500 p-5 font-bold text-white hover:bg-green-700"
+          onClick={() => setModelPath('./toyota_prius/scene.gltf')}
+        >
+          Toyota Prius
+        </button>
+        <button
+          className="border-2 rounded-md bg-green-500 p-5 font-bold text-white hover:bg-green-700"
+          onClick={() => setModelPath('./hyundai_accent/scene.gltf')}
+        >
+          Hyundai Accent
+        </button>
       </div>
     </div>
   );
