@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "./lib/orbitControls";
 import { GLTFLoader } from "./lib/GLTFLoader";
@@ -6,7 +6,10 @@ import { GLTFLoader } from "./lib/GLTFLoader";
 function App() {
   const ref = useRef();
 
+  const [modelPath, setModelPath] = useState('./toyota_prius/scene.gltf');
+
   useEffect(() => {
+    let refCurrent = ref.current;
     // Create scene
     const scene = new THREE.Scene();
     // Set background color
@@ -15,7 +18,7 @@ function App() {
     // Create camera
     const camera = new THREE.PerspectiveCamera(
       50,
-      window.innerWidth / window.innerHeight,
+      refCurrent.clientWidth / refCurrent.clientHeight,
       0.5,
       3000
     );
@@ -48,14 +51,14 @@ function App() {
     scene.add(light4);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(refCurrent.clientWidth, refCurrent.clientHeight);
 
     // document.body.appendChild( renderer.domElement );
     // use ref as a mount point of the Three.js scene instead of the document.body
-    ref.current.appendChild(renderer.domElement);
+    refCurrent.appendChild(renderer.domElement);
 
     // Control with mouse 
-    let controls = new OrbitControls(camera, ref.current);
+    let controls = new OrbitControls(camera, refCurrent);
     controls.update();
 
     let model, c, size; // model center and size  
@@ -69,7 +72,7 @@ function App() {
     // let car;
     loader.load(
       // URL
-      './toyota_prius/scene.gltf',
+      modelPath,
       // Resource is loaded
       function (gltf) {
         const box = new THREE.Box3().setFromObject(gltf.scene);
@@ -116,10 +119,19 @@ function App() {
 
     return () => {
       // Callback to cleanup three js, cancel animationFrame, etc
+      refCurrent.removeChild(refCurrent.firstChild);
     }
-  }, []);
+  }, [modelPath]);
 
-  return <div ref={ref} />;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ width: 800, height: 600, border: '5px solid black', borderRadius: 5, marginBottom: '2rem' }} ref={ref} />
+      <div style={{ width: 800, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around' }}>
+        <button onClick={() => setModelPath('./toyota_prius/scene.gltf')}>Show Toyota Prius</button>
+        <button onClick={() => setModelPath('./hyundai_accent/scene.gltf')}>Show Hyundai Accent</button>
+      </div>
+    </div>
+  );
 }
 
 export default App;
