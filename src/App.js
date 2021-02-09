@@ -7,6 +7,7 @@ function App() {
   const ref = useRef();
 
   useEffect(() => {
+    // Create scene
     const scene = new THREE.Scene();
     // Set background color
     scene.background = new THREE.Color(0xA9A9A9)
@@ -53,41 +54,65 @@ function App() {
     // use ref as a mount point of the Three.js scene instead of the document.body
     ref.current.appendChild(renderer.domElement);
 
+    // Control with mouse 
+    let controls = new OrbitControls(camera, ref.current);
+    controls.update();
+
+    let model, c, size; // model center and size  
+
+    // --- data input ---
+    let yRotation = 0;
+    let xPosition = 0;
+    let zPosition = 0;
+
     let loader = new GLTFLoader();
-    let car;
+    // let car;
     loader.load(
       // URL
       './toyota_prius/scene.gltf',
       // Resource is loaded
       function (gltf) {
-        car = gltf.scene.children[0];
-        car.scale.set(0.6, 0.6, 0.6);
+        const box = new THREE.Box3().setFromObject(gltf.scene);
+        const boxHelper = new THREE.Box3Helper(box, '0xffff00');
+        scene.add(boxHelper);
+        scene.remove(boxHelper);
+
+        c = box.getCenter(new THREE.Vector3());
+        size = box.getSize(new THREE.Vector3());
+
+        move(gltf);
+
         scene.add(gltf.scene);
-        animate();
+
+        model = gltf;
+
+        // car = gltf.scene.children[0];
+        // car.scale.set(0.6, 0.6, 0.6);
+        // scene.add(gltf.scene);
+        // animate();
       },
-      // called while loading is progressing
-      function (xhr) {
-        // Not usefull right now since asset is local
-        // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-      }
     );
 
-    let controls = new OrbitControls(camera, ref.current);
-
-    // controls.autoRotate = true;
+    animate();
 
     function animate() {
-      renderer.render(scene, camera);
       requestAnimationFrame(animate);
-      // Control with mouse 
-      controls.update();
-      if (car) {
-        // car.rotation.x += 0.01;
-        // car.position.x += 0.01;
+      yRotation += 0.01;
+      renderer.render(scene, camera);
+      if (model) {
+        move(model);
       }
     }
 
-    animate();
+    function move(gltf) {
+      gltf.scene.rotation.set(0, yRotation, 0);
+
+      // rotate center
+      const cz = c.z * Math.cos(yRotation) - c.x * Math.sin(yRotation);
+      const cx = c.z * Math.sin(yRotation) + c.x * Math.cos(yRotation);
+
+      gltf.scene.position.set(xPosition - cx, size.y / 2 - c.y, zPosition - cz)
+    }
 
     return () => {
       // Callback to cleanup three js, cancel animationFrame, etc
